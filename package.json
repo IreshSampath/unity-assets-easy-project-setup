@@ -1,0 +1,25 @@
+﻿{
+  "name": "com.ireshsampath.unity-tools.easy-project-setup",
+  "version": "1.0.0",
+  "displayName": "EasyProjectSetup",
+  "description": "EasyProjectSetup is a Unity Editor tool designed to quickly generate organized project folder structures and base scenes with lighting, UI, and managers. It helps developers standardize project setups with one click.",
+  "unity": "6000.0",
+  "unityRelease": "30f1",
+  "documentationUrl": "https://github.com/IreshSampath/unity-tools-easy-project-setup/blob/main/README.md",
+  "changelogUrl": "https://example.com/easy-project-setup-changelog.html",
+  "licensesUrl": "https://example.com/easy-project-setup-licensing.html",
+  "keywords": [
+    "editor",
+    "setup",
+    "folders",
+    "scene",
+    "unity tools",
+    "project organization",
+    "automation"
+  ],
+  "author": {
+    "name": "Iresh Sampath",
+    "email": "ireshsampath@gmail.com",
+    "url": "https://www.linkedin.com/in/ireshsampath/"
+  }
+}
