@@ -7,8 +7,8 @@ using UnityEngine.UI;
 
 public class ProjectSetupTool : EditorWindow
 {
-    string _rootFolderName = "_Project Root Folder"; // Default value
-    string _mainSceneName = "Main"; // Default value
+    string _rootFolderName = "_Project Root Folder";
+    string _mainSceneName = "Main";
 
     [MenuItem("Tools/EasyProjectSetup")]
     public static void ShowWindow()
@@ -27,53 +27,35 @@ public class ProjectSetupTool : EditorWindow
         else
             EditorGUILayout.HelpBox("✅ All set! You can now start working on your setup.", MessageType.Info);
 
+
+        GUILayout.Space(10);
         GUILayout.Label("🗃️ Project Setup", EditorStyles.boldLabel);
 
-        GUILayout.Space(5);
-        // Input field for folder name
         _rootFolderName = EditorGUILayout.TextField("Root Folder Name", _rootFolderName);
+        // --- Info ---
+        EditorGUILayout.HelpBox("⚠️ To enable folder coloring, start your root folder name with '_'.", MessageType.Info);
+
         GUILayout.Space(10);
-
-        GUI.enabled = !string.IsNullOrEmpty(_rootFolderName);
-
         if (GUILayout.Button("Create Project Root Folders"))
-        {
             CreateRootFolders();
-        }
 
-        GUILayout.Label("💡 Scene Setup", EditorStyles.boldLabel);
-        GUILayout.Space(5);
-        // Input field for scene name
-        _mainSceneName = EditorGUILayout.TextField("Scene Name", _mainSceneName);
         GUILayout.Space(10);
-        GUI.enabled = !string.IsNullOrEmpty(_mainSceneName);
+        GUILayout.Label("💡 Scene Setup", EditorStyles.boldLabel);
 
+        _mainSceneName = EditorGUILayout.TextField("Scene Name", _mainSceneName);
 
         if (GUILayout.Button("Create Main Scene"))
-        {
             CreateBaseScene();
-        }
 
+        GUILayout.Space(10);
         GUILayout.Label("📍 Hierarchy Setup", EditorStyles.boldLabel);
 
-        if (GUILayout.Button("Create UI"))
-        {
-            CreateUI();
-        }
+        if (GUILayout.Button("Create UI")) CreateUI();
+        if (GUILayout.Button("Create Managers")) CreateManagers();
+        if (GUILayout.Button("Create Basic Environment")) CreateEnvironment();
 
-        if (GUILayout.Button("Create Managers"))
-        {
-            CreateManagers();
-        }
-
-        if (GUILayout.Button("Create Basic Environment"))
-        {
-            CreateEnvironment();
-        }
-
+        GUILayout.Space(10);
         GUILayout.Label("🚀 All-in-One Setup", EditorStyles.boldLabel);
-
-
         if (GUILayout.Button("Create all-in-One Setup"))
         {
             CreateRootFolders();
@@ -83,10 +65,10 @@ public class ProjectSetupTool : EditorWindow
             CreateEnvironment();
         }
 
-
-        GUI.enabled = true; // re-enable GUI
-
-
+        GUILayout.Space(10);
+        GUILayout.Label("🧡 Color Settings", EditorStyles.boldLabel);
+        if (GUILayout.Button("Change Colors")) OpenSettings();
+        if (GUILayout.Button("Reset Colors")) ResetSettings();
     }
 
     void CreateRootFolders()
@@ -99,11 +81,16 @@ public class ProjectSetupTool : EditorWindow
 
         string basePath = Path.Combine("Assets", _rootFolderName);
 
-        string[] folders = {
-            $"{basePath}/Scenes",
-            $"{basePath}/Scripts",
-            $"{basePath}/Prefabs",
+        string[] folders =
+        {
+            $"{basePath}/Animations",
+            $"{basePath}/Audio",
             $"{basePath}/Materials",
+            $"{basePath}/Prefabs",
+            $"{basePath}/Scenes",
+            $"{basePath}/Scripts/Managers",
+            $"{basePath}/Scripts/Handlers",
+            $"{basePath}/Shaders",
             $"{basePath}/Textures"
         };
 
@@ -115,40 +102,37 @@ public class ProjectSetupTool : EditorWindow
 
         AssetDatabase.Refresh();
         Debug.Log($"✅ Default folders created under: Assets/{_rootFolderName}");
+
+        //// If name starts with "_", enable coloring
+        //if (_rootFolderName.StartsWith("_"))
+        //{
+        //    FolderColorizer.SetActiveRoot(_rootFolderName);
+        //    Debug.Log($"🎨 Folder coloring activated for '{_rootFolderName}'");
+        //}
+        //else
+        //{
+        //    FolderColorizer.SetActiveRoot(""); // disables coloring
+        //    Debug.Log($"🧹 Folder coloring disabled (root folder doesn’t start with '_').");
+        //}
+
+        // After creating folders / when user changes the root name:
+        //if (_rootFolderName.StartsWith("_"))
+        //    FolderColorizer.SetActiveRoot(_rootFolderName);
+        //else
+        //    FolderColorizer.SetActiveRoot(""); // disables all coloring
     }
 
     void CreateBaseScene()
     {
-        // Create a new empty scene
-        var scene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(
-            UnityEditor.SceneManagement.NewSceneSetup.EmptyScene);
+        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         scene.name = _mainSceneName;
-
-        //// === ENSURE SAVE PATH EXISTS ===
-        //string basePath = Path.Combine("Assets", _rootFolderName);
-        //string saveFolder = $"{basePath}/Scenes";
-        //if (!Directory.Exists(saveFolder))
-        //    Directory.CreateDirectory(saveFolder);
-
-        //string savePath = Path.Combine(saveFolder, "Main.unity");
-
-        //// === SAVE THE SCENE ===
-        //bool saved = EditorSceneManager.SaveScene(scene, savePath);
-        //if (saved)
-        //    Debug.Log($"✅ Scene created and saved to: {savePath}");
-        //else
-        //    Debug.LogError("❌ Failed to save scene!");
-
-        //AssetDatabase.Refresh();
-
         SaveScene();
     }
 
     void SaveScene()
     {
-                // === ENSURE SAVE PATH EXISTS ===
         string basePath = Path.Combine("Assets", _rootFolderName);
-        string saveFolder = Path.Combine(basePath,"Scenes");
+        string saveFolder = Path.Combine(basePath, "Scenes");
 
         if (!Directory.Exists(saveFolder))
             Directory.CreateDirectory(saveFolder);
@@ -162,107 +146,72 @@ public class ProjectSetupTool : EditorWindow
             return;
         }
 
-        // Make sure Unity considers the scene modified (procedural edits may happen between frames)
         EditorSceneManager.MarkSceneDirty(scene);
-
-        // Save *to the target path* (works whether scene was previously unsaved or already saved elsewhere)
         bool ok = EditorSceneManager.SaveScene(scene, savePath, true);
         if (ok)
             Debug.Log($"✅ Scene saved to: {savePath}");
-        else
-            Debug.LogError("❌ Failed to save scene.");
 
         AssetDatabase.Refresh();
     }
 
     void CreateUI()
     {
-        // === UI ===
         var ui = new GameObject("# ---- UI ----");
 
-        // === UI CANVAS & EVENT SYSTEM ===
-        // Event System (avoid duplicates)
         if (Object.FindObjectOfType<EventSystem>() == null)
-        {
-            var eventSys = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-            //eventSys.transform.SetParent(ui.transform);
-        }
+            new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
         var canvasGO = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-        var canvas = canvasGO.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        //canvasGO.transform.SetParent(ui.transform);
-        Debug.Log($"✅ UI created !");
+        canvasGO.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+
+        Debug.Log($"✅ UI created!");
         SaveScene();
     }
 
     void CreateManagers()
     {
-        // === Managers ===
-        var managers = new GameObject("# ---- Managers ----");
-        var appManager = new GameObject("App Manager");
-        var uiManager = new GameObject("UI Manager");
-
-        Debug.Log($"✅ Managers created !");
+        new GameObject("# ---- Managers ----");
+        new GameObject("App Manager");
+        new GameObject("UI Manager");
+        Debug.Log($"✅ Managers created!");
         SaveScene();
     }
 
     void CreateEnvironment()
     {
-        // === Environment ===
-        var env = new GameObject("# ---- Environment ----");
+        new GameObject("# ---- Environment ----");
 
-        // === DIRECTIONAL LIGHT ===
         var lightGO = new GameObject("Directional Light");
         var light = lightGO.AddComponent<Light>();
         light.type = LightType.Directional;
         light.intensity = 1f;
         light.color = Color.white;
         lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
-        //lightGO.transform.SetParent(lighting.transform);
 
-        // === MAIN CAMERA ===
         var camGO = new GameObject("Main Camera");
         var cam = camGO.AddComponent<Camera>();
         cam.tag = "MainCamera";
         camGO.transform.position = new Vector3(0f, 1f, -10f);
-        //camGO.transform.SetParent(player.transform);
 
-        // === POST-PROCESSING (URP/HDRP COMPATIBLE) ===
-#if USING_HDRP
-    var volumeGO = new GameObject("Global Volume");
-    var volume = volumeGO.AddComponent<UnityEngine.Rendering.Volume>();
-    volume.isGlobal = true;
-    volume.priority = 1;
-    volume.sharedProfile = new UnityEngine.Rendering.VolumeProfile();
-    //volumeGO.transform.SetParent(lighting.transform);
-#elif USING_URP
-    var volumeGO = new GameObject("Global Volume");
-    var volume = volumeGO.AddComponent<UnityEngine.Rendering.Volume>();
-    volume.isGlobal = true;
-    volume.priority = 1;
-    volume.sharedProfile = new UnityEngine.Rendering.VolumeProfile();
-
-    // Optional: Add default overrides
-    var bloom = volume.sharedProfile.Add<UnityEngine.Rendering.Universal.Bloom>();
-    bloom.active = true;
-    bloom.intensity.value = 0.5f;
-
-    var vignette = volume.sharedProfile.Add<UnityEngine.Rendering.Universal.Vignette>();
-    vignette.active = true;
-    vignette.intensity.value = 0.2f;
-
-    //volumeGO.transform.SetParent(lighting.transform);
-#endif
-
-        // === ORGANIZE HIERARCHY ===
-        //env.transform.SetSiblingIndex(0);
-        //managers.transform.SetSiblingIndex(1);
-        ////player.transform.SetSiblingIndex(2);
-        //ui.transform.SetSiblingIndex(2);
-
-        Debug.Log($"✅ Environment created !");
-
+        Debug.Log($"✅ Environment created!");
         SaveScene();
+    }
+
+    void OpenSettings()
+    {
+        var settings = EasyProjectColorSettings.Instance;
+        Selection.activeObject = settings;
+        EditorGUIUtility.PingObject(settings);
+    }
+
+    void ResetSettings()
+    {
+        var s = EasyProjectColorSettings.Instance;
+        var path = AssetDatabase.GetAssetPath(s);
+        AssetDatabase.DeleteAsset(path);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        // Recreate fresh defaults
+        Selection.activeObject = EasyProjectColorSettings.Instance;
     }
 }
