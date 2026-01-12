@@ -1,6 +1,6 @@
 ﻿{
-  "name": "com.ireshsampath.unity-tools.easy-project-setup",
-  "version": "1.0.0",
+  "name": "com.ireshsampath.unity-assets-easy-project-setup",
+  "version": "1.0.1",
   "displayName": "EasyProjectSetup",
   "description": "EasyProjectSetup is a Unity Editor tool designed to quickly generate organized project folder structures and base scenes with lighting, UI, and managers. It helps developers standardize project setups with one click.",
   "unity": "6000.0",
