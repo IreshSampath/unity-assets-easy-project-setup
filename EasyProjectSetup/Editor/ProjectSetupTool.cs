@@ -10,7 +10,7 @@ public class ProjectSetupTool : EditorWindow
     string _rootFolderName = "_Project Root Folder";
     string _mainSceneName = "Main";
 
-    [MenuItem("Tools/EasyProjectSetup")]
+    [MenuItem("Tools/GAG/EasyProjectSetup")]
     public static void ShowWindow()
     {
         GetWindow<ProjectSetupTool>("EasyProjectSetup");
